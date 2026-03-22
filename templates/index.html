@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ontario Lawn Fertilizer Planner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌱 Ontario Lawn Fertilizer Planner</h1>
+            <p>Personalized fertilizer schedule for healthy Ontario lawns</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="planner">Planner</button>
+            <button class="tab-btn" data-tab="calendar">Calendar</button>
+            <button class="tab-btn" data-tab="history">Track Applications</button>
+            <button class="tab-btn" data-tab="reminders">Reminders</button>
+        </nav>
+
+        <!-- PLANNER TAB -->
+        <div id="planner" class="tab-content active">
+            <section class="input-section">
+                <h2>Tell Us About Your Lawn</h2>
+                
+                <div class="form-group">
+                    <label for="grassType">Grass Type:</label>
+                    <select id="grassType">
+                        <option value="cool_season_mix">Cool-Season Mix (Kentucky Bluegrass, Rye, Fescue) - Most Common</option>
+                        <option value="perennial_rye">Perennial Ryegrass</option>
+                        <option value="tall_fescue">Tall Fescue</option>
+                    </select>
+                    <small>Most Ontario lawns are cool-season grasses</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="lawnHealth">Lawn Health:</label>
+                    <select id="lawnHealth">
+                        <option value="excellent">Excellent (Dense, vibrant green)</option>
+                        <option value="good" selected>Good (Mostly healthy with minor issues)</option>
+                        <option value="fair">Fair (Thin spots, some weeds)</option>
+                        <option value="poor">Poor (Sparse, stressed)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="soilTest">Soil Test Results (NPK values 0-30):</label>
+                    <div class="soil-inputs">
+                        <div>
+                            <label>Nitrogen (N):</label>
+                            <input type="number" id="nitrogen" min="0" max="30" value="15" class="soil-input">
+                        </div>
+                        <div>
+                            <label>Phosphorus (P):</label>
+                            <input type="number" id="phosphorus" min="0" max="30" value="15" class="soil-input">
+                        </div>
+                        <div>
+                            <label>Potassium (K):</label>
+                            <input type="number" id="potassium" min="0" max="30" value="15" class="soil-input">
+                        </div>
+                    </div>
+                    <small>Use lab results or leave at 15 for balanced. (0-10 = low, 15 = optimal, 20+ = high)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="lawnSize">Lawn Size (square feet):</label>
+                    <input type="number" id="lawnSize" value="5000" min="100">
+                    <small>Used to calculate fertilizer amounts needed</small>
+                </div>
+
+                <button class="btn-primary" onclick="getRecommendations()">Get Recommendations</button>
+            </section>
+
+            <section id="recommendationsSection" class="recommendations-section hidden">
+                <h2>Your Fertilizer Schedule for 2026</h2>
+                
+                <div id="healthInfo" class="health-info"></div>
+                
+                <div id="soilAdjustments" class="soil-adjustments"></div>
+
+                <div id="recommendationsList" class="recommendations-list"></div>
+            </section>
+        </div>
+
+        <!-- CALENDAR TAB -->
+        <div id="calendar" class="tab-content">
+            <section class="calendar-section">
+                <h2>Ontario Lawn Fertilizer Calendar 2026</h2>
+                <p class="calendar-intro">Fertilizer schedule aligned with Ontario growing season</p>
+                
+                <div id="calendarGrid" class="calendar-grid"></div>
+            </section>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div id="history" class="tab-content">
+            <section class="history-section">
+                <h2>Track Your Applications</h2>
+                
+                <div class="add-application">
+                    <h3>Log New Application</h3>
+                    <div class="form-group">
+                        <label for="appSeason">Season:</label>
+                        <select id="appSeason">
+                            <option value="">Select a season</option>
+                            <option value="Spring">Spring (Late April - May)</option>
+                            <option value="Early Summer">Early Summer (June)</option>
+                            <option value="Late Summer">Late Summer (July - August)</option>
+                            <option value="Fall">Fall (September - October)</option>
+                            <option value="Early Winter">Early Winter (November)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="appFertilizer">Fertilizer Used:</label>
+                        <input type="text" id="appFertilizer" placeholder="e.g., Scotts Turf Builder">
+                    </div>
+                    <div class="form-group">
+                        <label for="appAmount">Amount Applied (lbs):</label>
+                        <input type="number" id="appAmount" min="0" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="appNotes">Notes:</label>
+                        <textarea id="appNotes" placeholder="e.g., Weather conditions, lawn response..."></textarea>
+                    </div>
+                    <button class="btn-primary" onclick="saveApplication()">Log Application</button>
+                </div>
+
+                <div id="applicationsList" class="applications-list">
+                    <h3>Application History</h3>
+                    <p id="noAppsMessage">No applications logged yet.</p>
+                    <div id="appsHistoryDiv"></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- REMINDERS TAB -->
+        <div id="reminders" class="tab-content">
+            <section class="reminders-section">
+                <h2>Seasonal Reminders</h2>
+                
+                <div class="reminder spring-reminder">
+                    <h3>🌱 Spring (Late April - May)</h3>
+                    <p><strong>Action:</strong> Apply spring lawn starter (30-0-10 or similar)</p>
+                    <p><strong>Timing:</strong> When soil temperature reaches 60°F (usually late April)</p>
+                    <p><strong>Why:</strong> Awakens dormant grass and provides nitrogen for new growth</p>
+                    <p><strong>Ontario Tip:</strong> Watch for May 2-4 weekend; many start yard work then</p>
+                </div>
+
+                <div class="reminder early-summer-reminder">
+                    <h3>☀️ Early Summer (June)</h3>
+                    <p><strong>Action:</strong> Light feeding if lawn needs it (15-0-15)</p>
+                    <p><strong>Timing:</strong> Early June</p>
+                    <p><strong>Why:</strong> Supports growth without stressing grass in heat</p>
+                    <p><strong>Ontario Tip:</strong> Skip this if lawn is already lush; water instead</p>
+                </div>
+
+                <div class="reminder summer-reminder">
+                    <h3>🔥 Summer (July - August)</h3>
+                    <p><strong>Action:</strong> Minimal fertilizer; focus on watering</p>
+                    <p><strong>Timing:</strong> Mid-August only if needed (10-0-20)</p>
+                    <p><strong>Why:</strong> Cool-season grasses go dormant in heat; fertilizer can stress them</p>
+                    <p><strong>Ontario Tip:</strong> Deep watering is more important than fertilizer now</p>
+                </div>
+
+                <div class="reminder fall-reminder">
+                    <h3>🍂 Fall (September - October) - CRITICAL</h3>
+                    <p><strong>Action:</strong> Apply fall winterizer (25-0-25 or high-K)</p>
+                    <p><strong>Timing:</strong> Late September or early October</p>
+                    <p><strong>Why:</strong> Builds root strength and winter hardiness; most important application!</p>
+                    <p><strong>Ontario Tip:</strong> This feeding determines how well lawn survives Ontario winters</p>
+                </div>
+
+                <div class="reminder winter-reminder">
+                    <h3>❄️ Early Winter (November) - Optional</h3>
+                    <p><strong>Action:</strong> Potassium-only boost (0-0-60) if desired</p>
+                    <p><strong>Timing:</strong> Early November before ground freezes</p>
+                    <p><strong>Why:</strong> Extra winter survival for excellent lawns</p>
+                    <p><strong>Ontario Tip:</strong> Only for well-maintained lawns; skip if average</p>
+                </div>
+
+                <div class="reminder">
+                    <h3>📋 General Ontario Tips</h3>
+                    <ul>
+                        <li>Cool-season grasses peak in spring and fall—fertilize accordingly</li>
+                        <li>Avoid fertilizing June-August; it stresses grass in heat</li>
+                        <li>Water deeply after each application for best results</li>
+                        <li>Check soil pH (6.0-7.0 is ideal) annually</li>
+                        <li>Never fertilize frozen ground</li>
+                        <li>Local Ontario weather can vary; adjust timing by 1-2 weeks based on your specific area</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <footer>
+        <p>Ontario Lawn Fertilizer Planner | Optimized for cool-season grasses in Ontario</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='game.js') }}"></script>
+</body>
+</html>
